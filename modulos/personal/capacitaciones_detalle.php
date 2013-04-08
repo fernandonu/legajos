@@ -2,12 +2,14 @@
 /*
 AUTOR: Gabriel
 MODIFICADO POR:
-$Author: ferni $
-$Revision: 1.12 $
-$Date: 2006/11/21 19:53:21 $
+$Author: gaby$
+$Revision: 1.13 $
+$Date: 2013/03/26 16:09:21 $
 */
 
 	require("../../config.php");
+	extract($_POST,EXTR_SKIP);
+if ($parametros) extract($parametros,EXTR_OVERWRITE);
 	require("gutils.php");
 	echo $html_header; 
 	cargar_calendario();
@@ -19,6 +21,8 @@ $Date: 2006/11/21 19:53:21 $
 		"comentarios"=>"", 
 		"dictado_desde"=>"", 
 		"dictado_hasta"=>"" , 
+		"hora_desde"=>"",
+		"hora_hasta"=>"",
 		"dictado_por"=>"",
 		"id_capacitacion"=>"", 
 		"tema"=>"", 
@@ -48,6 +52,34 @@ $Date: 2006/11/21 19:53:21 $
 	//////////////////////////////////////////////////////////////////////////////
 ?>
 <script>
+function esHoraValida(str){
+hora=str.value
+if (hora.length>5) {alert("Formato de hora HHMM, ejemplo: 18:20");return}
+if (hora.length!=5) {alert("Formato de hora HHMM, ejemplo: 18:00");return}
+a=hora.charAt(0)
+b=hora.charAt(1)
+c=hora.charAt(2)
+d=hora.charAt(3)
+	if (a>=2 && b>3) {
+		alert("Formato de hora 24");
+		hora.focus()
+		return
+	}
+	if (c !=':') {
+				alert("Utilice como separador el signo ':' ");
+				hora.focus()
+				return
+			}
+	if (d>5) {
+				alert("Por favor, verifique los minutos de la hora ingresada");
+				hora.focus()
+				return 
+			}
+			
+	return true
+}
+
+
 var warchivos=0;
 function moveOver() {
 	var boxLength;// = document.form1.compatibles.length;
@@ -164,7 +196,10 @@ function clearfields(){
 	document.form1.hbck_text.value="";
 	document.form1.hguardar.value="";
 }
-</script>
+
+
+  </script> 
+
 <?
 	if($parametros['accion']!=""){ Aviso($parametros['accion']);}
 	//////////////////////////////////////////////////////////////////////////////
@@ -195,6 +230,8 @@ function clearfields(){
 	if ($modo=="nuevo"){
 		$dictado_desde=" ";
 		$dictado_hasta=" ";
+		$hora_desde="";
+		$hora_hasta="";
 		$tema="";
 		$comentarios="";
 		$locacion="";
@@ -215,10 +252,10 @@ function clearfields(){
 		else $dictado=0;
 		$temporal=sql("select * from capacitaciones where id_capacitacion=$id_capacitacion") or fin_pagina();
 		if ($temporal->recordCount()==0){
-			$sql="insert into capacitaciones (id_capacitacion, tema, dictado_desde, dictado_hasta, comentarios, locacion, dictado, dictado_por)";
-			$sql.="values ($id_capacitacion, '$tema', ".$dictado_desde_cad.", ".$dictado_hasta_cad.", '".$comentarios."', '".$locacion."', $dictado, '".$dictado_por."')";
+			$sql="insert into capacitaciones (id_capacitacion, tema, dictado_desde, dictado_hasta, hora_desde, hora_hasta, comentarios, locacion, dictado, dictado_por)";
+			$sql.="values ($id_capacitacion, '$tema', ".$dictado_desde_cad.", ".$dictado_hasta_cad.", '".$hora_desde."', '".$hora_hasta."','".$comentarios."', '".$locacion."', '".$dictado."', '".$dictado_por."')";
 		}else{
-			$sql="update capacitaciones set tema='".$tema."', dictado_desde=".$dictado_desde_cad.", dictado_hasta=".$dictado_hasta_cad.", comentarios='".$comentarios."', locacion='".$locacion."', dictado=$dictado, dictado_por='".$dictado_por."' ";
+			$sql="update capacitaciones set tema='".$tema."', dictado_desde=".$dictado_desde_cad.", dictado_hasta=".$dictado_hasta_cad.",hora_desde='".$hora_desde."',hora_hasta='".$hora_hasta."', comentarios='".$comentarios."', locacion='".$locacion."', dictado='".$dictado."', dictado_por='".$dictado_por."' ";
 			$sql.=" where id_capacitacion=".$id_capacitacion;
 		}
 		sql($sql, "Error al agregar/actualizar registro") or fin_pagina();
@@ -248,23 +285,28 @@ function clearfields(){
 	if ((!$dictado_desde)||($dictado_desde=='?')) $dictado_desde='';
 	if ((!$dictado_hasta)||($dictado_hasta=='?')) $dictado_hasta='';
 	?>
-		<table border="1" cellspacing="0" bgcolor="<?=$bgcolor2?>" width="90%" align="center">
+		<table border="1" cellspacing="0" bgcolor="<?=$bgcolor2?>" width="80%" align="center">
 			<colgroup width="20%" id="mo" align="left"></colgroup>
 			<th align="center" colspan="3"><?=$titulo_tabla?></th>
 			<tr>
 				<td>Tema:</td>
 				<td colspan="2">
-					<input type="text" name="tema" value="<?=$tema?>" size="100" style="width:100%"></input>
-				</td>
+					<textarea  rows='2' name="tema" cols="80" style="width:80%"><?=$tema?></textarea>
 			</tr>
-			<tr>
-				<td>Período de dictado:</td>
-				<td align="center">Desde <input type="text" name="dictado_desde" value="<?=$dictado_desde?>" readonly></input>&nbsp;<?=link_calendario("dictado_desde")?></td>
-				<td align="center">Hasta <input type="text" name="dictado_hasta" value="<?=$dictado_hasta?>" readonly></input>&nbsp;<?=link_calendario("dictado_hasta")?></td>
+			
+			 <tr>
+			            	<td>Período de dictado:</td>
+							<td width="20%">Desde: <input type="text" name="dictado_desde" value="<?=$dictado_desde?>" readonly></input>&nbsp;<?=link_calendario("dictado_desde")?></td>
+							<td width="80%">Hasta: <input type="text" name="dictado_hasta" value="<?=$dictado_hasta?>" readonly></input>&nbsp;<?=link_calendario("dictado_hasta")?></td>
 			</tr>
+					<td>Horario:</td>
+							<td width="20%">Desde: <input type="text" name="hora_desde" value="<?=$hora_desde?>" onBlur="esHoraValida(this)"/>Hora (HHMM)</input>&nbsp;</td>
+							<td width="20%">Hasta: <input type="text" name="hora_hasta" value="<?=$hora_hasta?>" onBlur="esHoraValida(this)"/>Hora (HHMM)</input>&nbsp;</td>
+				
+         	</tr>    
 			<tr>
 				<td >Instalaciones:</td>
-				<td colspan="1">
+				<td width="100%" colspan="1" style="width:30%">
 					<?
 						$rta_sql=sql("select * from personal.base_trabajo") or fin_pagina();
 						$i=1;
@@ -278,13 +320,13 @@ function clearfields(){
 						g_draw_value_select("sel_locacion", $locacion, $pcias_id, $pcias_nombre, 1, "onchange='update_disponibles(this);'");?>
 				</td>
 				<td>
-					Dictado por: <input type="text" name="dictado_por" value="<?=$dictado_por?>">
+					Dictado por: <input type="text" name="dictado_por" value="<?=$dictado_por?>" style="width:70%">
 				</td>
 			</tr>
 			<tr>
 				<td>Comentarios:</td>
 				<td colspan="2">
-					<textarea rows="2" name="tcomentarios" cols="80" style="width:100%"><?=$comentarios?></textarea>
+					<textarea rows="2" name="tcomentarios" cols="80" style="width:80%"><?=$comentarios?></textarea>
 				</td>
 			</tr>
 			<tr>
@@ -299,7 +341,7 @@ function clearfields(){
 				</td>
 			</tr>
 		</table>
-		<table border="1" cellspacing="0" bgcolor="<?=$bgcolor3?>" width="90%" align="center">
+		<table border="1" cellspacing="0" bgcolor="<?=$bgcolor3?>" width="80%" align="center">
 			<tr><td align="center" colspan="3" id="mo">Personal</td></tr>
 			<tr id="mo"><td width="45%">Disponibles</td><td>&nbsp;</td><td width="45%">Afectados al curso</td></tr>
 			<tr>
