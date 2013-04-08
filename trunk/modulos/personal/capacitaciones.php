@@ -40,7 +40,7 @@ $Date: 2006/01/17 20:48:26 $
   	"tema" => "Tema",
 		"d.nombre" => "Lugar de dictado"
 	);     
-	$sql_tmp="select id_capacitacion, dictado, tema, comentarios, dictado_desde, dictado_hasta, d.nombre as locacion, dictado_por 
+	$sql_tmp="select id_capacitacion, dictado, tema, comentarios, dictado_desde, dictado_hasta, hora_desde, hora_hasta  , d.nombre as locacion, dictado_por 
 		from personal.capacitaciones join personal.base_trabajo d on(locacion=id_base_trabajo) ";
 	$where_tmp=" (dictado_desde is null or cast (dictado_desde as text) ilike '%".$cmd."-%')";
 	if (($sel_periodo)and($fecha_desde)and($fecha_hasta))
@@ -108,9 +108,10 @@ $Date: 2006/01/17 20:48:26 $
 			</td>
 		</tr>
 		<tr id=mo>
- 			<td width="60%" nowrap><b><a href='<?=encode_link($_SERVER["PHP_SELF"],array("sort"=>"1","up"=>$up))?>'>Tema</a></b></td>
- 			<td width="25%" nowrap><b><a href='<?=encode_link($_SERVER["PHP_SELF"],array("sort"=>"2","up"=>$up))?>'>Per&iacute;odo de dictado</b></td>
- 			<td width="10%"><b><a href='<?=encode_link($_SERVER["PHP_SELF"],array("sort"=>"3","up"=>$up))?>'>Lugar de dictado</b></td>
+ 			<td width="50%" nowrap><b><a href='<?=encode_link($_SERVER["PHP_SELF"],array("sort"=>"1","up"=>$up))?>'>Tema</a></b></td>
+ 			<td width="15%" nowrap><b><a href='<?=encode_link($_SERVER["PHP_SELF"],array("sort"=>"2","up"=>$up))?>'>Per&iacute;odo de dictado</b></td>
+ 			<td width="12%" nowrap><b><a href='<?=encode_link($_SERVER["PHP_SELF"],array("sort"=>"3","up"=>$up))?>'>Horario</b></td>
+ 			<td width="28%"><b><a href='<?=encode_link($_SERVER["PHP_SELF"],array("sort"=>"4","up"=>$up))?>'>Lugar de dictado</b></td>
  			<td width="5%"><b><a href='<?=encode_link($_SERVER["PHP_SELF"])?>'>&nbsp;</b></td>
 		</tr>
 		<?
@@ -119,6 +120,8 @@ $Date: 2006/01/17 20:48:26 $
 				$tema=$result->fields["tema"];
 				$dictado_desde=Fecha($result->fields["dictado_desde"]) or $dictado_desde="?";
 				$dictado_hasta=Fecha($result->fields["dictado_hasta"]) or $dictado_hasta="?";
+				$hora_desde=$result->fields["hora_desde"] or $hora_desde="?";
+				$hora_hasta=$result->fields["hora_hasta"] or $hora_hasta="?";
 				$id_capacitacion=$result->fields["id_capacitacion"];
 				$dictado=$result->fields["dictado"];
 				$comentarios=$result->fields["comentarios"];
@@ -130,9 +133,12 @@ $Date: 2006/01/17 20:48:26 $
 				
 				if ($dictado!="0") $color_celda="#66FF66";
 				else $color_celda=$bgcolor5;
+				
 				$ref = encode_link("capacitaciones_detalle.php",array("modo"=>"modif", "locacion"=>$locacion, "dictado"=>$dictado, "dictado_por"=>$dictado_por, "comentarios"=>$comentarios, "dictado_desde"=>$dictado_desde, "dictado_hasta"=>$dictado_hasta , "id_capacitacion"=>$id_capacitacion, "tema"=>$tema, "pagina"=>"capacitaciones_detalle.php"));
 				tr_tag($ref);
-				echo "<td bgcolor=$color_celda>$tema</td><td bgcolor=$color_celda>$dictado_desde a $dictado_hasta</td><td nowrap bgcolor=$color_celda>$locacion</td>";
+				
+				echo "<td bgcolor=$color_celda>$tema</td><td bgcolor=$color_celda>$dictado_desde a $dictado_hasta</td><td bgcolor=$color_celda>$hora_desde a $hora_hasta</td>";
+				echo "<td nowrap bgcolor=$color_celda>$locacion</td>";
 				echo "<td width='5%' bgcolor=$color_celda>";
 				if ($adjunto->recordcount()>0) echo "<img id='imagen_1' src='../../imagenes/files1.gif' border=0 title='El curso posee archivos subidos' align='left'>";
 				echo "&nbsp</td></tr>";
